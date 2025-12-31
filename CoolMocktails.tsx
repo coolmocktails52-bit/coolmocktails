@@ -4,6 +4,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { GlassWater, ArrowLeft, Sparkles, Beaker, Zap, Search, SlidersHorizontal } from 'lucide-react';
 import { MOCKTAILS, type Mocktail } from './mocktailsData'
 import Image from 'next/image';
+import Footer from '@/app/Footer';
 const MocktailBlog = () => {
   const [selectedDrink, setSelectedDrink] = useState<Mocktail | null>(null);
   const [searchQuery, setSearchQuery] = useState("");
@@ -172,6 +173,7 @@ const MocktailBlog = () => {
           </motion.div>
         )}
       </AnimatePresence>
+      <Footer show={true}/>
     </div>
   );
 };

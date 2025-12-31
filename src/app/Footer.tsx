@@ -1,12 +1,12 @@
 'use client'
 import { usePathname } from "next/navigation";
 
-const Footer = () => {
+const Footer = ({show}:{show?:boolean}) => {
     const pathname = usePathname();
 
   // Define which paths should NOT have a footer
   const noFooterPages = ["/"];
-  const showFooter = !noFooterPages.includes(pathname);
+  const showFooter = show ? show : !noFooterPages.includes(pathname) ;
   
 
   return (
