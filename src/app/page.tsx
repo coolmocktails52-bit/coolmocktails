@@ -1,7 +1,10 @@
+import MocktailBlog from "../../CoolMocktails";
+import NavBar from "./NavBar";
+
 export default function Home() {
   return (
-    <div className="flex min-h-screen items-center justify-center bg-zinc-50 font-sans dark:bg-black">
-      coolmocktails
+    <div className="bg-[#050a0a] h-screen w-screen">
+    <MocktailBlog/>
     </div>
   );
 }
