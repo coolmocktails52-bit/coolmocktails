@@ -2,6 +2,7 @@ import { NextResponse } from "next/server"
 
 import fs from "fs/promises"
 import path from "path"
+import { MOCKTAILS } from "mocktailsData"
 
 const dataFile = path.join(
   process.cwd(),
@@ -9,33 +10,11 @@ const dataFile = path.join(
   "mocktails.json"
 )
 
-export async function readMocktails() {
-  try {
-    const data = await fs.readFile(dataFile, "utf-8")
-    return JSON.parse(data)
-  } catch (err: any) {
-    if (err.code === "ENOENT") {
-
-      return []
-    }
-    throw err
-  }
-}
-
-export async function writeMocktails(mocktails: any[]) {
-  await fs.mkdir(path.dirname(dataFile), { recursive: true })
-  await fs.writeFile(
-    dataFile,
-    JSON.stringify(mocktails, null, 2),
-    "utf-8"
-  )
-}
-
 
 export async function GET() {
   try {
-    const mocktails = await readMocktails()
-    return NextResponse.json(mocktails)
+    
+    return NextResponse.json(MOCKTAILS)
   } catch (err) {
     console.error("API /mocktails error:", err)
     return NextResponse.json(
@@ -59,7 +38,7 @@ export async function POST(req: Request) {
       )
     }
 
-    const mocktails = await readMocktails()
+    const mocktails = MOCKTAILS
 
     const newMocktail = {
       id: Date.now(),
@@ -82,7 +61,6 @@ export async function POST(req: Request) {
     }
 
     mocktails.push(newMocktail)
-    await writeMocktails(mocktails)
 
     return NextResponse.json(newMocktail, { status: 201 })
   } catch (err) {

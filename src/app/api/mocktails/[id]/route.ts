@@ -1,7 +1,8 @@
 export const runtime = "nodejs"
 
+import { MOCKTAILS } from "mocktailsData"
 import { NextResponse } from "next/server"
-import { readMocktails } from "@/lib/mocktails"
+
 
 export async function GET(
   _req: Request,
@@ -18,7 +19,7 @@ export async function GET(
       )
     }
 
-    const mocktails = await readMocktails()
+    const mocktails = MOCKTAILS
     const mocktail = mocktails.find(
       (m: any) => m.id === parsedId
     )

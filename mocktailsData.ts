@@ -1,4 +1,5 @@
 export interface Mocktail {
+  comments: any;
   id: number;
   name: string;
   subtitle: string;

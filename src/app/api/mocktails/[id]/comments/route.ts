@@ -1,7 +1,7 @@
 export const runtime = "nodejs"
 
 import { NextResponse } from "next/server"
-import { readMocktails, writeMocktails } from "@/lib/mocktails"
+import { MOCKTAILS } from "mocktailsData"
 
 export async function POST(
   req: Request,
@@ -28,7 +28,7 @@ export async function POST(
       )
     }
 
-    const mocktails = await readMocktails()
+    const mocktails = MOCKTAILS
     const mocktail = mocktails.find(
       (m: any) => m.id === mocktailId
     )
@@ -48,7 +48,6 @@ export async function POST(
     }
 
     mocktail.comments.push(newComment)
-    await writeMocktails(mocktails)
 
     return NextResponse.json(newComment, { status: 201 })
   } catch (err) {
