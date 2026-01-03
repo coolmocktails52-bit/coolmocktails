@@ -1,9 +1,8 @@
 export const runtime = "nodejs"
-
+ 
 import { cookies } from "next/headers"
 import { NextResponse } from "next/server"
 import { supabaseAdmin } from "@/lib/supabase" 
-
 /* ---------------- GET (ALL MOCKTAILS) ---------------- */
 
 export async function GET() {
@@ -40,20 +39,21 @@ export async function GET() {
   }
 }
 
+
 export async function POST(req: Request) {
   try {
-    // FIX: Await cookies() for Next.js 15 compatibility
+    /* 🔐 FIX: Await cookies() - Mandatory for Next.js 15+ */
     const cookieStore = await cookies()
     
-    // IMPORTANT: Check your actual cookie name in the browser. 
-    // Usually it is 'sb-access-token' or just 'token' if you set it manually.
+    /* 🔍 Get the token. 
+       Note: Ensure the name 'token' matches what your SignIn route sets. */
     const accessToken = cookieStore.get("token")?.value
 
     if (!accessToken) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
     }
 
-    /* 🔍 Verify user using the admin client */
+    /* 🔍 Verify user session */
     const { data: { user }, error: authError } = await supabaseAdmin.auth.getUser(accessToken)
 
     if (authError || !user) {
@@ -62,7 +62,7 @@ export async function POST(req: Request) {
 
     const { title, ingredients, steps, history, image } = await req.json()
 
-    /* 🧠 Insert into Postgres */
+    /* 🧠 Insert with the Admin Client */
     const { data, error } = await supabaseAdmin
       .from("recipes")
       .insert({

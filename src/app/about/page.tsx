@@ -86,12 +86,12 @@ const AboutPage = () => {
           <p className="text-gray-400 mb-8 max-w-md mx-auto italic">
             Explore our curated library of spirit-free recipes and find your next signature pour.
           </p>
-          <button 
+          <Link 
             className="bg-yellow-600 hover:bg-yellow-500 text-[#050a0a] px-8 py-3 rounded-full font-bold uppercase text-xs tracking-[0.2em] transition-all"
-            onClick={() => window.history.back()}
+            href="/"
           >
             Explore Recipes
-          </button>
+          </Link>
         </motion.div>       
       </div>
     </div>

@@ -26,7 +26,7 @@ const NavBar = () => {
 
 
   // Define which paths should NOT have a footer
-  const noFooterPages = ["/",'/login','/signup'];
+  const noFooterPages = ['/login','/signup'];
   const showNavbar = !noFooterPages.includes(pathname);
   
 
