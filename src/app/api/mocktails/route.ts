@@ -1,8 +1,8 @@
 export const runtime = "nodejs"
 
-import { NextResponse } from "next/server"
 import { cookies } from "next/headers"
-import { supabaseAdmin } from "@/lib/supabase"
+import { NextResponse } from "next/server"
+import { supabaseAdmin } from "@/lib/supabase" 
 
 /* ---------------- GET (ALL MOCKTAILS) ---------------- */
 
@@ -39,52 +39,30 @@ export async function GET() {
     )
   }
 }
+
 export async function POST(req: Request) {
   try {
-    /* 🔐 Get token from cookies - AWAIT IS REQUIRED IN NEXT.js 15 */
-    const cookieStore = await cookies() 
+    // FIX: Await cookies() for Next.js 15 compatibility
+    const cookieStore = await cookies()
     
-    // NOTE: Replace "token" with the actual name of your auth cookie
-    // Usually Supabase uses a name like 'sb-xxxxx-auth-token'
-    const accessToken = cookieStore.get("sb-mliqtqgjzmqioeklvclc-auth-token")?.value
+    // IMPORTANT: Check your actual cookie name in the browser. 
+    // Usually it is 'sb-access-token' or just 'token' if you set it manually.
+    const accessToken = cookieStore.get("token")?.value
 
     if (!accessToken) {
-      return NextResponse.json(
-        { error: "Unauthorized: No token found" },
-        { status: 401 }
-      )
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
     }
 
-    /* 🔍 Verify user */
-    const {
-      data: { user },
-      error: authError,
-    } = await supabaseAdmin.auth.getUser(accessToken)
+    /* 🔍 Verify user using the admin client */
+    const { data: { user }, error: authError } = await supabaseAdmin.auth.getUser(accessToken)
 
     if (authError || !user) {
-      return NextResponse.json(
-        { error: "Invalid session" },
-        { status: 401 }
-      )
+      return NextResponse.json({ error: "Invalid session" }, { status: 401 })
     }
 
-    /* 📦 Body */
-    const {
-      title,
-      ingredients,
-      steps,
-      history,
-      image,
-    } = await req.json()
+    const { title, ingredients, steps, history, image } = await req.json()
 
-    if (!title || !ingredients || !steps) {
-      return NextResponse.json(
-        { error: "Title, ingredients, and steps are required" },
-        { status: 400 }
-      )
-    }
-
-    /* 🧠 Insert */
+    /* 🧠 Insert into Postgres */
     const { data, error } = await supabaseAdmin
       .from("recipes")
       .insert({
@@ -95,29 +73,15 @@ export async function POST(req: Request) {
         history,
         image,
       })
-      .select(`
-        id,
-        title,
-        image,
-        history,
-        created_at
-      `)
+      .select()
       .single()
 
     if (error) {
-      console.error("Supabase error:", error)
-      return NextResponse.json(
-        { error: error.message || "Failed to create mocktail" },
-        { status: 500 }
-      )
+      return NextResponse.json({ error: error.message }, { status: 500 })
     }
 
     return NextResponse.json(data, { status: 201 })
   } catch (err) {
-    console.error("POST /api/mocktails error:", err)
-    return NextResponse.json(
-      { error: "Internal server error" },
-      { status: 500 }
-    )
+    return NextResponse.json({ error: "Internal server error" }, { status: 500 })
   }
 }
