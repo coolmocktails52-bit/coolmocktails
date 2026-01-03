@@ -5,7 +5,7 @@ const Footer = ({show}:{show?:boolean}) => {
     const pathname = usePathname();
 
   // Define which paths should NOT have a footer
-  const noFooterPages = ["/"];
+  const noFooterPages = ["/home" , '/'];
   const showFooter = show ? show : !noFooterPages.includes(pathname) ;
   
 

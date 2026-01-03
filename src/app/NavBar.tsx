@@ -26,7 +26,7 @@ const NavBar = () => {
 
 
   // Define which paths should NOT have a footer
-  const noFooterPages = ["/"];
+  const noFooterPages = ["/",'/login','/signup'];
   const showNavbar = !noFooterPages.includes(pathname);
   
 
@@ -44,22 +44,7 @@ const NavBar = () => {
           ))}
         </div>
         
-        <div className="flex items-center gap-2">
-          <AnimatePresence>
-            {isSearchOpen && (
-              <motion.input 
-                initial={{ width: 0, opacity: 0 }}
-                animate={{ width: typeof window !== 'undefined' && window.innerWidth < 768 ? 120 : 200, opacity: 1 }}
-                exit={{ width: 0, opacity: 0 }}
-                placeholder="Search..."
-                className="bg-white/5 border border-white/10 rounded-full px-3 py-1 text-[10px] outline-none focus:border-yellow-600 italic text-white"
-              />
-            )}
-          </AnimatePresence>
-          <button onClick={() => setIsSearchOpen(!isSearchOpen)} className="text-gray-400 hover:text-white p-1">
-            {isSearchOpen ? <X size={18} /> : <Search size={18} />}
-          </button>
-        </div>
+        
       </div>
 
       {/* --- MAIN BAR --- */}
@@ -73,32 +58,6 @@ const NavBar = () => {
           <Menu size={24} />
         </button>
 
-        {/* Desktop Left: Categories */}
-        <div className="relative hidden md:block w-1/3">
-          <button 
-            onClick={() => setIsCategoryOpen(!isCategoryOpen)}
-            className="flex items-center gap-2 text-[10px] uppercase tracking-[0.2em] text-gray-400 hover:text-white transition-colors"
-          >
-            Categories <ChevronDown size={14} className={isCategoryOpen ? 'rotate-180 transition-transform' : 'transition-transform'} />
-          </button>
-          
-          <AnimatePresence>
-            {isCategoryOpen && (
-              <motion.div 
-                initial={{ opacity: 0, y: 10 }}
-                animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, y: 10 }}
-                className="absolute top-full left-0 mt-4 bg-[#0a0f0f] border border-white/10 rounded-xl p-4 w-48 shadow-2xl backdrop-blur-2xl"
-              >
-                {categories.map((cat) => (
-                  <Link key={cat} href={`/category/${cat.toLowerCase()}`} onClick={() => setIsCategoryOpen(false)} className="block py-2 text-xs text-gray-400 hover:text-yellow-600 transition-colors italic border-b border-white/5 last:border-0">
-                    {cat}
-                  </Link>
-                ))}
-              </motion.div>
-            )}
-          </AnimatePresence>
-        </div>
 
         {/* Center: Logo */}
         <div className="absolute left-1/2 -translate-x-1/2 flex justify-center">

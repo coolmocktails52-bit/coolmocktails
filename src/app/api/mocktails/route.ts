@@ -1,72 +1,122 @@
+export const runtime = "nodejs"
+
 import { NextResponse } from "next/server"
+import { cookies } from "next/headers"
+import { supabaseAdmin } from "@/lib/supabase"
 
-import fs from "fs/promises"
-import path from "path"
-import { MOCKTAILS } from "mocktailsData"
-
-const dataFile = path.join(
-  process.cwd(),
-  "data",
-  "mocktails.json"
-)
-
+/* ---------------- GET (ALL MOCKTAILS) ---------------- */
 
 export async function GET() {
   try {
-    
-    return NextResponse.json(MOCKTAILS)
+    const { data, error } = await supabaseAdmin
+      .from("recipes")
+      .select(`
+        id,
+        title,
+        image,
+        history,
+        created_at,
+        users (
+          username
+        )
+      `)
+      .order("created_at", { ascending: false })
+
+    if (error) {
+      console.error(error)
+      return NextResponse.json(
+        { error: "Failed to load mocktails" },
+        { status: 500 }
+      )
+    }
+
+    return NextResponse.json(data)
   } catch (err) {
-    console.error("API /mocktails error:", err)
+    console.error("GET /api/mocktails error:", err)
     return NextResponse.json(
-      { error: "Failed to read mocktails" },
+      { error: "Internal server error" },
       { status: 500 }
     )
   }
 }
-
-
-
 export async function POST(req: Request) {
   try {
-    const body = await req.json()
+    /* 🔐 Get token from cookies - AWAIT IS REQUIRED IN NEXT.js 15 */
+    const cookieStore = await cookies() 
+    
+    // NOTE: Replace "token" with the actual name of your auth cookie
+    // Usually Supabase uses a name like 'sb-xxxxx-auth-token'
+    const accessToken = cookieStore.get("sb-mliqtqgjzmqioeklvclc-auth-token")?.value
 
-    // 🔒 Minimal validation
-    if (!body.name || !body.description) {
+    if (!accessToken) {
       return NextResponse.json(
-        { error: "Name and description are required" },
+        { error: "Unauthorized: No token found" },
+        { status: 401 }
+      )
+    }
+
+    /* 🔍 Verify user */
+    const {
+      data: { user },
+      error: authError,
+    } = await supabaseAdmin.auth.getUser(accessToken)
+
+    if (authError || !user) {
+      return NextResponse.json(
+        { error: "Invalid session" },
+        { status: 401 }
+      )
+    }
+
+    /* 📦 Body */
+    const {
+      title,
+      ingredients,
+      steps,
+      history,
+      image,
+    } = await req.json()
+
+    if (!title || !ingredients || !steps) {
+      return NextResponse.json(
+        { error: "Title, ingredients, and steps are required" },
         { status: 400 }
       )
     }
 
-    const mocktails = MOCKTAILS
+    /* 🧠 Insert */
+    const { data, error } = await supabaseAdmin
+      .from("recipes")
+      .insert({
+        user_id: user.id,
+        title,
+        ingredients,
+        steps,
+        history,
+        image,
+      })
+      .select(`
+        id,
+        title,
+        image,
+        history,
+        created_at
+      `)
+      .single()
 
-    const newMocktail = {
-      id: Date.now(),
-      name: body.name,
-      subtitle: body.subtitle ?? "",
-      description: body.description,
-      category: body.category ?? "Mystical",
-      prepTime: body.prepTime ?? "5 min",
-      difficulty: body.difficulty ?? "Beginner",
-      glassware: body.glassware ?? "",
-      calories: body.calories ?? 0,
-      flavorNotes: body.flavorNotes ?? [],
-      garnish: body.garnish ?? "",
-      color: body.color ?? "#000000",
-      image: body.image ?? "",
-      ingredients: body.ingredients ?? [],
-      method: body.method ?? "",
-      dateToPublish: body.dateToPublish ?? new Date().toISOString(),
-      comments: []
+    if (error) {
+      console.error("Supabase error:", error)
+      return NextResponse.json(
+        { error: error.message || "Failed to create mocktail" },
+        { status: 500 }
+      )
     }
 
-    mocktails.push(newMocktail)
-
-    return NextResponse.json(newMocktail, { status: 201 })
+    return NextResponse.json(data, { status: 201 })
   } catch (err) {
     console.error("POST /api/mocktails error:", err)
     return NextResponse.json(
-      { error: "Failed to create mocktail" },
+      { error: "Internal server error" },
       { status: 500 }
     )
   }

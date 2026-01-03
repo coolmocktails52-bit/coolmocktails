@@ -72,6 +72,7 @@ export default function MocktailBlog() {
       try {
         const res = await fetch("/api/mocktails")
         const data = await res.json()
+        console.log("data ==>",data);
         setMocktails(data)
       } catch (err) {
         console.error("Failed to fetch mocktails", err)
@@ -86,7 +87,7 @@ export default function MocktailBlog() {
   /* ---------------- FILTER ---------------- */
 
   const filteredMocktails = useMemo(() => {
-    return mocktails.filter((drink) => {
+    return mocktails?.filter((drink) => {
       const matchesSearch =
         drink.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
         drink.description.toLowerCase().includes(searchQuery.toLowerCase())
